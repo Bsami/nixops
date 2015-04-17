@@ -730,6 +730,61 @@ subparser.add_argument('--arg', nargs=2, action="append", dest="args", metavar=(
 subparser.add_argument('--argstr', nargs=2, action="append", dest="argstrs", metavar=('NAME', 'VALUE'), help='pass a string value')
 subparser.add_argument('--unset', nargs=1, action="append", dest="unset", metavar='NAME', help='unset previously set argument')
 
+
+##############
+
+from boto import kms
+from prettytable import PrettyTable
+
+
+conn = kms.connect_to_region("us-east-1")
+
+def list_keys():
+    id_list = []
+    _keys = {}
+    x = PrettyTable(["KeyId","AliasName","Enabled","KeyUsage","Description"])
+    all_aliases = conn.list_aliases()['Aliases']
+    all_keys = conn.list_keys()['Keys']
+    for key in all_keys :
+        id_list.append(key['KeyId'])
+    for k_id in id_list :
+        _keys[k_id] = {}        
+        k_meta = conn.describe_key(k_id)['KeyMetadata']
+        _keys[k_id]['Enabled'] = k_meta["Enabled"]
+        _keys[k_id]['KeyUsage'] = k_meta["KeyUsage"]
+        _keys[k_id]['Description'] = k_meta["Description"]
+        _keys[k_id]['AliasName'] = ''
+
+    for k_id in id_list :
+        for alias in all_aliases :
+            try :
+                if alias['TargetKeyId'] == k_id :
+                    _keys[k_id]['AliasName'] = alias["AliasName"]
+                else : pass
+            except KeyError, e :
+                pass
+    for elmt in _keys :
+        x.add_row([elmt,_keys[elmt]["AliasName"],_keys[elmt]["Enabled"],_keys[elmt]["KeyUsage"],_keys[elmt]["Description"]])   
+                
+    print x
+
+
+##############
+subparser = add_subparser('list_kms_keys', help='list existing kms-generated keys')
+#subparser.add_argument('--force', action='store_true', help='force deletion even if resources still exist')
+#subparser.add_argument('--all', action='store_true', help='delete all deployments')
+subparser.set_defaults(op=list_keys)
+##############
+
+
+
+
+
+
+
+
+
+
 def add_common_deployment_options(subparser):
     subparser.add_argument('--include', nargs='+', metavar='MACHINE-NAME', help='perform deployment actions on the specified machines only')
     subparser.add_argument('--exclude', nargs='+', metavar='MACHINE-NAME', help='do not perform deployment actions on the specified machines')
