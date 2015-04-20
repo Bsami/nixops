@@ -28,6 +28,7 @@ class EBSVolumeDefinition(nixops.resources.ResourceDefinition):
         self.iops = int(xml.find("attrs/attr[@name='iops']/int").get("value"))
         if self.iops == 0: self.iops = None
         self.volume_type = xml.find("attrs/attr[@name='volumeType']/string").get("value")
+        self.encrypted = xml.find("attrs/attr[@name='encrypted']/bool").get("value")
 
     def show_type(self):
         return "{0} [{1}]".format(self.get_type(), self.region)
@@ -44,6 +45,7 @@ class EBSVolumeState(nixops.resources.ResourceState, nixops.resources.ec2_common
     size = nixops.util.attr_property("ec2.size", None, int)
     iops = nixops.util.attr_property("ec2.iops", None, int)
     volume_type = nixops.util.attr_property("ec2.volumeType", None)
+    encrypted = nixops.util.attr_property("ec2.encrypted", None)
 
 
     @classmethod

@@ -23,6 +23,7 @@ import nixops.resources.iam_role
 import nixops.resources.s3_bucket
 import nixops.resources.ec2_security_group
 import nixops.resources.ebs_volume
+import nixops.resources.kms_keys
 import nixops.resources.elastic_ip
 import nixops.resources.gce_disk
 import nixops.resources.gce_image
@@ -362,6 +363,11 @@ class Deployment(object):
 
         for x in res.find("attr[@name='ebsVolumes']/attrs").findall("attr"):
             defn = nixops.resources.ebs_volume.EBSVolumeDefinition(x)
+            self.definitions[defn.name] = defn
+
+        # Definition of kmsKeys attributes
+        for x in res.find("attr[@name='kmsKeys']/attrs").findall("attr"):
+            defn = nixops.resources.kms_keys.KmsKeyDefinition(x)
             self.definitions[defn.name] = defn
 
         for x in res.find("attr[@name='elasticIPs']/attrs").findall("attr"):

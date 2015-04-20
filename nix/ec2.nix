@@ -78,11 +78,11 @@ let
 
       encryptionType = mkOption {
         default = "luks";
-        type = types.enum [ "luks" "ebs" ];
+        type = types.enum [ "luks" "ebs" "kms" ];
         description = ''
           Whether the EBS volume should be encrypted using LUKS or on the
-          underlying EBS volume (Amazon EBS feature). Possible values are
-          "luks" (default) and "ebs".
+          underlying EBS volume (Amazon EBS feature) or using AWS KMS service. Possible values are
+          "luks" (default) , "ebs" and "kms".
         '';
       };
 

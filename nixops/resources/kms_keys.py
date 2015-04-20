@@ -4,7 +4,8 @@
 # Automatic provisioning of AWS KMS.
 
 
-import boto import kms
+import boto
+from boto import kms
 import nixops.util
 import nixops.resources
 import nixops.kms_utils
@@ -167,3 +168,6 @@ class KmsKeyState(nixops.resources.ResourceState):
         if self.state == self.STARTING or check:
             nixops.kms_utils.wait_for_key_available(self._conn, self.KeyId, self.logger, states=['Creating', 'Created'])
             self.state = self.UP
+
+
+    
