@@ -74,7 +74,9 @@ class KmsKeyState(nixops.resources.ResourceState):
         return "resources.KmsKeys."
 
     def connect(self):
-        if self._conn: return (access_key_id, secret_access_key) = nixops.kms_utils.fetch_aws_secret_key(self.access_key_id)
+        if self._conn: 
+            (access_key_id, secret_access_key) = nixops.kms_utils.fetch_aws_secret_key(self.access_key_id)
+            return (access_key_id, secret_access_key)
         self._conn = kms.layer1.KMSConnection(aws_access_key_id=access_key_id, aws_secret_access_key=secret_access_key)
 
 
@@ -170,4 +172,3 @@ class KmsKeyState(nixops.resources.ResourceState):
             self.state = self.UP
 
 
-    
