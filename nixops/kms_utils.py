@@ -6,7 +6,7 @@ import time
 import random
 import nixops.util
 
-from kms.exceptions import *
+from boto.kms.exceptions import *
 from boto.exception import SQSError
 from boto.exception import BotoServerError
 

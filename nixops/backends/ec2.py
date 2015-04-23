@@ -62,9 +62,8 @@ class EC2Definition(MachineDefinition):
                     'deleteOnTermination': xml.find("attrs/attr[@name='deleteOnTermination']/bool").get("value") == "true",
                     'encrypt': xml.find("attrs/attr[@name='encrypt']/bool").get("value") == "true",
                     'encryptionType': xml.find("attrs/attr[@name='encryptionType']/string").get("value"),
-                    'passphrase': xml.find("attrs/attr[@name='passphrase']/string").get("value")
-                    'keyId': xml.find("attrs/attr[@name='keyId']/string").get("value")}
-                    
+                    'passphrase': xml.find("attrs/attr[@name='passphrase']/string").get("value")}
+
 
         self.block_device_mapping = {_xvd_to_sd(k.get("name")): f(k) for k in x.findall("attr[@name='blockDeviceMapping']/attrs/attr")}
         self.elastic_ipv4 = x.find("attr[@name='elasticIPv4']/string").get("value")
