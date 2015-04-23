@@ -102,6 +102,18 @@ let
         '';
       };
 
+      keyId = mkOption {
+        default = "";
+        example = "2821cb68-4842-4db6-81c9-0623751b1266";
+        type = types.str;
+        description = ''
+          The Id of the KMS encryption key.
+          if it is specified, it will be used for volume encryption.
+          if it is not specified, the default kms ebs key for the region will be used.
+          if option 'new' is used, a new kms key will be created.
+        '';
+      };
+
       passphrase = mkOption {
         default = "";
         type = types.str;
