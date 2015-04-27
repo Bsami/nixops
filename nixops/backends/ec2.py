@@ -17,6 +17,7 @@ import nixops.resources.ec2_common
 import nixops.util
 import nixops.ec2_utils
 import nixops.known_hosts
+import nixops.resources.kms_keys
 from xml import etree
 
 class EC2InstanceDisappeared(Exception):
@@ -173,16 +174,17 @@ class EC2State(MachineState, nixops.resources.ec2_common.EC2CommonState):
 
     def get_physical_spec(self):
         block_device_mapping = {}
+        key = ""
         for k, v in self.block_device_mapping.items():
             if (v.get('encrypt', False)
                 and v.get('encryptionType', "luks") == "luks"
                 and v.get('passphrase', "") == ""
                 and v.get('generatedKey', "") != ""):
-                block_device_mapping[_sd_to_xvd(k)] = {
-                    'passphrase': Function("pkgs.lib.mkOverride 10",
-                                           v['generatedKey'], call=True),
-                }
-
+                block_device_mapping[_sd_to_xvd(k)] = {'passphrase': Function("pkgs.lib.mkOverride 10", v['generatedKey'], call=True) }
+            
+            if (v.get('encrypt', True) and v.get('encryptionType', "kms") == "kms" ):
+                key = kms_keys.provide_key(v.get('keyId'))
+                block_device_mapping[_sd_to_xvd(k)] = {'keyId': Function("pkgs.lib.mkOverride 10", key , call=True) }
         return {
             'require': [
                 RawValue("<nixpkgs/nixos/modules/virtualisation/amazon-config.nix>")
