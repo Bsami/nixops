@@ -62,7 +62,8 @@ class EC2Definition(MachineDefinition):
                     'deleteOnTermination': xml.find("attrs/attr[@name='deleteOnTermination']/bool").get("value") == "true",
                     'encrypt': xml.find("attrs/attr[@name='encrypt']/bool").get("value") == "true",
                     'encryptionType': xml.find("attrs/attr[@name='encryptionType']/string").get("value"),
-                    'passphrase': xml.find("attrs/attr[@name='passphrase']/string").get("value")}
+                    'passphrase': xml.find("attrs/attr[@name='passphrase']/string").get("value"),
+                    'keyId': xml.find("attrs/attr[@name='keyId']/string").get("value")}
 
 
         self.block_device_mapping = {_xvd_to_sd(k.get("name")): f(k) for k in x.findall("attr[@name='blockDeviceMapping']/attrs/attr")}
@@ -926,7 +927,7 @@ class EC2State(MachineState, nixops.resources.ec2_common.EC2CommonState):
             if v['disk'] == '':
                 if k in self.block_device_mapping: continue
                 self.log("creating EBS volume of {0} GiB...".format(v['size']))
-                ebs_encrypt = v.get('encryptionType', "luks") == "ebs"
+                ebs_encrypt = (v.get('encryptionType', "luks") == "ebs") or (v.get('encryptionType', "luks") == "kms") # added kms support here
                 volume = self._conn.create_volume(size=v['size'], zone=self.zone, volume_type=v['volumeType'], iops=v['iops'], encrypted=ebs_encrypt)
                 v['volumeId'] = volume.id
 

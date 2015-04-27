@@ -23,9 +23,33 @@ let
 
   cfg = config.deployment.ec2;
 
+
   defaultEbsOptimized =
     let props = config.deployment.ec2.physicalProperties;
     in if props == null then false else (props.allowsEbsOptimized or false);
+
+  # Newly added
+
+  defaultUseKmsEncryption =
+    let
+      doEncrypt = config.deployment.ec2.encrypt;
+      encryptionType = config.deployment.ec2.encryptionType;
+    in
+      if doEncrypt == true && encryptionType == "kms" then
+        true
+      else
+        false;
+
+  kmsScript = import ./../nixops/resources/kms_keys.py
+
+  defaultUseKmsKey =
+    let
+      id = config.deployment.ec2.keyId;
+    in
+      useKmsKeyId = kmsScript.provide_key(id) 
+
+  ####
+
 
   commonEC2Options = import ./common-ec2-options.nix { inherit lib; };
 
@@ -72,7 +96,8 @@ let
         default = false;
         type = types.bool;
         description = ''
-          Whether the EBS volume should be encrypted using LUKS.
+          Whether the EBS volume should be encrypted using one of the suuported 
+          encryption types : LUCKS, EBS or KMS.
         '';
       };
 
@@ -83,6 +108,25 @@ let
           Whether the EBS volume should be encrypted using LUKS or on the
           underlying EBS volume (Amazon EBS feature) or using AWS KMS service. Possible values are
           "luks" (default) , "ebs" and "kms".
+        '';
+      };
+
+      # Newly added
+      useKmsEncryption = mkOption {
+        default = defaultUseKmsEncryption;
+        type = types.bool;
+        description = ''
+          Whether to use KMS encryption on the underlying EBS volume or not.
+          if ec2DiskOptions.encrypt = true and ec2DiskOptions.encryptionType = 'kms' --> this option is setted to true.
+        '';
+      };
+
+      useKmsKey = mkOption {
+        default = defaultUseKmsKey;
+        description = ''
+          The key to be used for the encryption : if the value is not setted, the default ebs encryption key
+          will be used. if the value is "new", a new kms key will be generated and used for the encryption.
+          if an existing kms key id is specified, it will be used for the encryption. 
         '';
       };
 
@@ -110,7 +154,7 @@ let
           The Id of the KMS encryption key.
           if it is specified, it will be used for volume encryption.
           if it is not specified, the default kms ebs key for the region will be used.
-          if option 'new' is used, a new kms key will be created.
+          if option "new" is used, a new kms key will be created.
         '';
       };
 
@@ -122,7 +166,7 @@ let
           the device.  If left empty, a passphrase is generated
           automatically; this passphrase is lost when you destroy the
           machine or remove the volume, unless you copy it from
-          NixOps's state file.  Note that the passphrase is stored in
+          NixOps state file.  Note that the passphrase is stored in
           the Nix store of the instance, so an attacker who gains
           access to the EBS volume or instance store that contains the
           Nix store can subsequently decrypt the encrypted volume.

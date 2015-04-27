@@ -110,7 +110,7 @@ def retry(f, error_codes=[], logger=None):
 
 
 def get_kms_key_by_id(conn, key_id, allow_missing=False):
-    """Get kms key object by key id."""
+    """ Get kms key object by key id """
     try:
         all_keys = conn.list_keys()['Keys']
         for key in all_keys :
@@ -122,7 +122,7 @@ def get_kms_key_by_id(conn, key_id, allow_missing=False):
 
 
 def wait_for_key_available(conn, key_id, logger, states=['Creating', 'Created']):
-    """Wait for a KMS key to become available."""
+    """ Wait for a KMS key to become available """
 
     logger.log_start("waiting for key ‘{0}’ to become available... ".format(key_id))
 
@@ -133,3 +133,14 @@ def wait_for_key_available(conn, key_id, logger, states=['Creating', 'Created'])
     nixops.util.check_wait(check_available, max_tries=90)
 
     logger.log_end('')
+
+def get_keyId_by_alias(conn, alias):
+    """ Get kms key object by alias """
+    try:
+        all_aliases = conn.list_aliases()['Aliases']
+        for a in all_aliases :
+            if a['AliasName'] == alias :
+                return a['TargetKeyId']
+    except kms.exceptions.NotFoundException as e:
+        if e : raise Exception("unable to find key from alias '{1}'".format(alias))
+    return None
