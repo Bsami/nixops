@@ -32,7 +32,7 @@ let
 
   defaultUseKmsEncryption =
     let
-      doEncrypt = config.deployment.ec2.encrypt;
+      doEncrypt = config.fileSystems.ec2DiskOptions.encrypt;
       encryptionType = config.deployment.ec2.encryptionType;
     in
       if doEncrypt == true && encryptionType == "kms" then
@@ -40,13 +40,13 @@ let
       else
         false;
 
-  kmsScript = import ./../nixops/resources/kms_keys.py
+  kmsScript = import ./../nixops/resources/kms_keys.py ;
 
   defaultUseKmsKey =
     let
       id = config.deployment.ec2.keyId;
     in
-      useKmsKeyId = kmsScript.provide_key(id) 
+      kmsScript.provide_key(id) ;
 
   ####
 
