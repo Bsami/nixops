@@ -30,10 +30,11 @@ let
 
   # Newly added
 
-  defaultUseKmsEncryption =
+  defaultUseKmsEncryption = { ec2DiskOptions, ... }:
+
     let
-      doEncrypt = cfg.blockDeviceMapping.encrypt;
-      encryptionType = cfg.blockDeviceMapping.encryptionType;
+      doEncrypt = ec2DiskOptions.options.encrypt;
+      encryptionType = ec2DiskOptions.options.encryptionType;
     in
       if doEncrypt == true && encryptionType == "kms" then
         true
@@ -41,9 +42,9 @@ let
         false;
 
 
-  defaultUseKmsKey =
+  defaultUseKmsKey = { ec2DiskOptions, ... }:
     let
-      id = config.deployment.ec2.blockDeviceMapping.keyId;
+      id = ec2DiskOptions.options.keyId;
     in
       id ;
 
