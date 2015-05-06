@@ -13,11 +13,10 @@ from boto.exception import BotoServerError
 def fetch_aws_secret_key(access_key_id):
     """
     Fetch the secret access key corresponding to the given access key ID from the environment or 
-    from ~/.ec2-keys or from ~/.aws/credentials
+    from ~/.ec2-keys.
     """
     secret_access_key = os.environ.get('EC2_SECRET_KEY') or os.environ.get('AWS_SECRET_ACCESS_KEY')
     path = os.path.expanduser("~/.ec2-keys")
-    path2 = os.path.expanduser("~/.aws/credentials")
     if os.path.isfile(path):
         f = open(path, 'r')
         contents = f.read()
@@ -33,22 +32,7 @@ def fetch_aws_secret_key(access_key_id):
             if w[0] == access_key_id:
                 secret_access_key = w[1]
                 break
-    elif os.path.isfile(path2):
-        f = open(path2, 'r')
-        contents = f.read()
-        f.close()
-        for l in contents.splitlines():
-            l = l.split("#")[0] # drop comments
-            w = l.split()
-            if len(w) < 2 or len(w) > 3: continue
-            if len(w) == 3 and w[2] == access_key_id:
-                access_key_id = w[0]
-                secret_access_key = w[1]
-                break
-            if w[0] == access_key_id:
-                secret_access_key = w[1]
-                break
-
+    
     if not secret_access_key:
         raise Exception("please set $EC2_SECRET_KEY or $AWS_SECRET_ACCESS_KEY, or add the key for ‘{0}’ to '~/.ec2-keys' or to '~/.aws/credentials'"
                         .format(access_key_id))

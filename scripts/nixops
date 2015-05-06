@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from nixops import deployment
+from nixops import kms_utils
 from nixops.nix_expr import py2nix
 from nixops.parallel import MultipleExceptions, run_tasks
 
@@ -436,7 +437,7 @@ def op_show_physical():
 
 def op_list_keys():
 
-    conn = kms.connect_to_region("us-east-1")
+    conn = kms_utils.connect("us-east-1", kms_utils.get_access_key_id())
 
     id_list = []
     _keys = {}

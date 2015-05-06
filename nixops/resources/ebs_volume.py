@@ -114,7 +114,7 @@ class EBSVolumeState(nixops.resources.ResourceState, nixops.resources.ec2_common
 
             volume = self._conn.create_volume(
                 zone=defn.zone, size=defn.size, snapshot=defn.snapshot,
-                iops=defn.iops, volume_type=defn.volume_type)
+                iops=defn.iops, volume_type=defn.volume_type, encrypted=defn.encrypted)
 
             # FIXME: if we crash before the next step, we forget the
             # volume we just created.  Doesn't seem to be anything we
@@ -128,6 +128,7 @@ class EBSVolumeState(nixops.resources.ResourceState, nixops.resources.ec2_common
                 self.volume_id = volume.id
                 self.iops = defn.iops
                 self.volume_type = defn.volume_type
+                self.encrypted = defn.encrypted
 
             self.log("volume ID is ‘{0}’".format(volume.id))
 
