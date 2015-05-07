@@ -8,7 +8,7 @@ import boto
 from boto import kms
 import nixops.util
 import nixops.resources
-import nixops.kms_utils
+from nixops import kms_utils
 
 
 class KmsKeyDefinition(nixops.resources.ResourceDefinition):
@@ -76,7 +76,7 @@ class KmsKeyState(nixops.resources.ResourceState):
     def connect(self):
         if self._conn: 
             return self._conn
-        (access_key_id, secret_access_key) = nixops.kms_utils.fetch_aws_secret_key(self.access_key_id)
+        (access_key_id, secret_access_key) = kms_utils.fetch_aws_secret_key(self.access_key_id)
             #return (access_key_id, secret_access_key)
         self._conn = kms.layer1.KMSConnection(aws_access_key_id=access_key_id, aws_secret_access_key=secret_access_key)
         return self._conn
@@ -102,7 +102,7 @@ class KmsKeyState(nixops.resources.ResourceState):
 
     def create(self, defn, check, allow_reboot, allow_recreate):
 
-        self.access_key_id = defn.access_key_id or nixops.kms_utils.get_access_key_id()
+        self.access_key_id = defn.access_key_id or kms_utils.get_access_key_id()
         if not self.access_key_id:
             raise Exception("please set ‘accessKeyId’, $EC2_ACCESS_KEY or $AWS_ACCESS_KEY_ID")
 
@@ -169,7 +169,7 @@ class KmsKeyState(nixops.resources.ResourceState):
             defn.grants['operations'], defn.grants['constraints'], defn.grants['grant_tokens'])
 
         if self.state == self.STARTING or check:
-            nixops.kms_utils.wait_for_key_available(self._conn, self.KeyId, self.logger, states=['Creating', 'Created'])
+            kms_utils.wait_for_key_available(self._conn, self.KeyId, self.logger, states=['Creating', 'Created'])
             self.state = self.UP
 
 
@@ -181,8 +181,8 @@ class KmsKeyState(nixops.resources.ResourceState):
                 key = conn.create_key()
                 return key['KeyId']
             else :
-                key = nixops.kms_utils.get_kms_key_by_id(conn, param)
+                key = kms_utils.get_kms_key_by_id(conn, param)
                 return key['KeyId']
         else :
-            key = nixops.kms_utils.get_keyId_by_alias(conn,"alias/aws/ebs")
+            key = kms_utils.get_keyId_by_alias(conn,"alias/aws/ebs")
             return key
