@@ -69,7 +69,7 @@ rec {
       '';
   };
 
-  build = pkgs.lib.genAttrs [ "x86_64-linux" "i686-linux" ] (system:
+  build = pkgs.lib.genAttrs [ "x86_64-linux" "i686-linux" "x86_64-darwin"] (system:
     with import <nixpkgs> { inherit system; };
 
     pythonPackages.buildPythonPackage rec {
