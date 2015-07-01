@@ -113,7 +113,7 @@ let
 
       # Newly added
       useKmsEncryption = mkOption {
-        default = false #defaultUseKmsEncryption;
+        default = false; #defaultUseKmsEncryption;
         type = types.bool;
         description = ''
           Whether to use KMS encryption on the underlying EBS volume or not.
@@ -122,7 +122,7 @@ let
       };
 
       useKmsKey = mkOption {
-        default = "" #defaultUseKmsKey;
+        default = ""; #defaultUseKmsKey;
         type = types.str;
         description = ''
           The key to be used for the encryption : if the value is not setted, the default ebs encryption key
