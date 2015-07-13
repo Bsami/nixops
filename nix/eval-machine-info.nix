@@ -84,6 +84,8 @@ rec {
   resources.ebsVolumes = evalResources ./ebs-volume.nix (zipAttrs resourcesByType.ebsVolumes or []);
   resources.elasticIPs = evalResources ./elastic-ip.nix (zipAttrs resourcesByType.elasticIPs or []);
   resources.machines = mapAttrs (n: v: v.config) nodes;
+  resources.kmsKeys = evalResources ./kms-keys.nix (zipAttrs resourcesByType.kmsKeys or []);
+
 
   # Google Compute resources
   resources.gceDisks = evalResources ./gce-disk.nix (zipAttrs resourcesByType.gceDisks or []);
